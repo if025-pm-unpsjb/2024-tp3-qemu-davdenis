@@ -99,6 +99,8 @@ typedef struct xTaskStruct xTask;
 xTask task1 = { TASK1_WCET, TASK1_PERIOD };
 xTask task2 = { TASK2_WCET, TASK2_PERIOD };
 xTask task3 = { TASK3_WCET, TASK3_PERIOD };
+xTask task4 = { TASK4_WCET, TASK4_PERIOD };
+xTask task5 = { TASK5_WCET, TASK5_PERIOD };
 
 /*************************************************************************
  * Main
@@ -133,6 +135,8 @@ int main( void )
     xTaskCreate( prvTask, "T1", configMINIMAL_STACK_SIZE + 50, (void*) &task1, configMAX_PRIORITIES - 1, NULL );
     xTaskCreate( prvTask, "T2", configMINIMAL_STACK_SIZE + 50, (void*) &task2, configMAX_PRIORITIES - 2, NULL );
     xTaskCreate( prvTask, "T3", configMINIMAL_STACK_SIZE + 50, (void*) &task3, configMAX_PRIORITIES - 3, NULL );
+    xTaskCreate( prvTask, "T4", configMINIMAL_STACK_SIZE + 50, (void*) &task4, configMAX_PRIORITIES - 4, NULL );
+    xTaskCreate( prvTask, "T5", configMINIMAL_STACK_SIZE + 50, (void*) &task5, configMAX_PRIORITIES - 5, NULL );
 
     vTraceEnable( TRC_START );
 
@@ -197,11 +201,15 @@ void prvTask( void *pvParameters )
 
 	for( ;; )
 	{
-        sprintf( cMessage, "%s - %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount );
-
+		pxPreviousWakeTime = xTaskGetTickCount();
+        sprintf( cMessage, "S Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ),uxReleaseCount, pxPreviousWakeTime);
         prvPrintString( cMessage );
 
         vBusyWait( task->wcet );
+
+		pxPreviousWakeTime = xTaskGetTickCount();
+        sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, pxPreviousWakeTime);
+        prvPrintString( cMessage );
 
 		vTaskDelayUntil( &pxPreviousWakeTime, task->period );
 

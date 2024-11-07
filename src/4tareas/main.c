@@ -132,7 +132,7 @@ int main( void )
     xTaskCreate( prvTask, "T1", configMINIMAL_STACK_SIZE + 50, (void*) &task1, configMAX_PRIORITIES - 1, NULL );
     xTaskCreate( prvTask, "T2", configMINIMAL_STACK_SIZE + 50, (void*) &task2, configMAX_PRIORITIES - 2, NULL );
     xTaskCreate( prvTask, "T3", configMINIMAL_STACK_SIZE + 50, (void*) &task3, configMAX_PRIORITIES - 3, NULL );
-    xTaskCreate( prvTask, "T4", configMINIMAL_STACK_SIZE + 50, (void*) &task3, configMAX_PRIORITIES - 4, NULL );
+    xTaskCreate( prvTask, "T4", configMINIMAL_STACK_SIZE + 50, (void*) &task4, configMAX_PRIORITIES - 4, NULL );
 
     vTraceEnable( TRC_START );
 
