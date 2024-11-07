@@ -11,6 +11,7 @@
 /* FreeRTOS */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
 
 /* Standard includes. */
 #include <stdio.h>
@@ -76,6 +77,10 @@ static void vBusyWait( TickType_t ticks );
  */
 static void prvTask( void* pvParameters );
 
+static void prvTask1( void* pvParameters );
+
+static void prvTask4( void* pvParameters );
+
 /*-----------------------------------------------------------*/
 
 /* Functions to access the OLED.  The one used depends on the dev kit
@@ -99,6 +104,8 @@ xTask task2 = { TASK2_WCET, TASK2_PERIOD };
 xTask task3 = { TASK3_WCET, TASK3_PERIOD };
 xTask task4 = { TASK4_WCET, TASK4_PERIOD };
 
+SemaphoreHandle_t xSemaphore;
+
 /*************************************************************************
  * Main
  *************************************************************************/
@@ -108,6 +115,9 @@ int main( void )
 	vTraceEnable( TRC_INIT );
 
     prvSetupHardware();
+
+    xSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(xSemaphore);
 
     /* Map the OLED access functions to the driver functions that are appropriate
     for the evaluation kit being used. */
@@ -129,10 +139,10 @@ int main( void )
     prvPrintString("Start!\n\r");
 
     /* Creates the periodic tasks. */
-    xTaskCreate( prvTask, "T1", configMINIMAL_STACK_SIZE + 50, (void*) &task1, configMAX_PRIORITIES - 1, NULL );
+    xTaskCreate( prvTask1, "T1", configMINIMAL_STACK_SIZE + 50, (void*) &task1, configMAX_PRIORITIES - 1, NULL );
     xTaskCreate( prvTask, "T2", configMINIMAL_STACK_SIZE + 50, (void*) &task2, configMAX_PRIORITIES - 2, NULL );
     xTaskCreate( prvTask, "T3", configMINIMAL_STACK_SIZE + 50, (void*) &task3, configMAX_PRIORITIES - 3, NULL );
-    xTaskCreate( prvTask, "T4", configMINIMAL_STACK_SIZE + 50, (void*) &task4, configMAX_PRIORITIES - 4, NULL );
+    xTaskCreate( prvTask4, "T4", configMINIMAL_STACK_SIZE + 50, (void*) &task4, configMAX_PRIORITIES - 4, NULL );
 
     vTraceEnable( TRC_START );
 
@@ -201,6 +211,68 @@ void prvTask( void *pvParameters )
         prvPrintString( cMessage );
 
         vBusyWait( task->wcet );
+
+        sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, xTaskGetTickCount());
+        prvPrintString( cMessage );
+
+		vTaskDelayUntil( &pxPreviousWakeTime, task->period );
+
+        uxReleaseCount += 1;
+	}
+
+	vTaskDelete( NULL );
+}
+
+void prvTask1( void *pvParameters )
+{
+	char cMessage[ mainMAX_MSG_LEN ];
+	unsigned int uxReleaseCount = 0;
+	TickType_t pxPreviousWakeTime = 0;
+	xTask *task = (xTask*) pvParameters;
+
+	for( ;; )
+	{
+        sprintf( cMessage, "S Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ),uxReleaseCount, xTaskGetTickCount());
+        prvPrintString( cMessage );
+
+        vBusyWait(200);
+
+        xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        vBusyWait(500);
+        xSemaphoreGive(xSemaphore);
+
+        vBusyWait(300);
+
+        sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, xTaskGetTickCount());
+        prvPrintString( cMessage );
+
+		vTaskDelayUntil( &pxPreviousWakeTime, task->period );
+
+        uxReleaseCount += 1;
+	}
+
+	vTaskDelete( NULL );
+}
+
+void prvTask4( void *pvParameters )
+{
+	char cMessage[ mainMAX_MSG_LEN ];
+	unsigned int uxReleaseCount = 0;
+	TickType_t pxPreviousWakeTime = 0;
+	xTask *task = (xTask*) pvParameters;
+
+	for( ;; )
+	{
+        sprintf( cMessage, "S Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ),uxReleaseCount, xTaskGetTickCount());
+        prvPrintString( cMessage );
+
+        vBusyWait(500);
+
+        xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        vBusyWait(1000);
+        xSemaphoreGive(xSemaphore);
+
+        vBusyWait(500);
 
         sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, xTaskGetTickCount());
         prvPrintString( cMessage );

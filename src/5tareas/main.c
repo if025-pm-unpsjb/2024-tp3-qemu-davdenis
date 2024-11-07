@@ -201,14 +201,12 @@ void prvTask( void *pvParameters )
 
 	for( ;; )
 	{
-		pxPreviousWakeTime = xTaskGetTickCount();
-        sprintf( cMessage, "S Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ),uxReleaseCount, pxPreviousWakeTime);
+        sprintf( cMessage, "S Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ),uxReleaseCount, xTaskGetTickCount());
         prvPrintString( cMessage );
 
         vBusyWait( task->wcet );
 
-		pxPreviousWakeTime = xTaskGetTickCount();
-        sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, pxPreviousWakeTime);
+        sprintf( cMessage, "E Tarea: %s - Instancia: %u - Ticks: %u\n\r", pcTaskGetTaskName( NULL ), uxReleaseCount, xTaskGetTickCount());
         prvPrintString( cMessage );
 
 		vTaskDelayUntil( &pxPreviousWakeTime, task->period );
